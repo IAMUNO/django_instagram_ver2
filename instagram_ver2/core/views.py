@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+
 from .models import Profile
 from django.contrib import messages
 from django.shortcuts import render, redirect
@@ -7,7 +9,9 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url="signin")
 def index(request):
-    return render(request, 'index.html')
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    return render(request, 'index.html', {'user_profile': user_profile})
 
 
 @login_required(login_url="signin")
@@ -61,7 +65,6 @@ def signup(request):
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
 
-
                 # create profile object for the new user
                 user_model = User.objects.get(username=username)
                 new_profile = Profile.objects.create(user=user_model, id_user=user_model.id)
@@ -98,3 +101,8 @@ def signin(request):
 def logout(request):
     auth.logout(request)
     return redirect('signin')
+
+
+@login_required(login_url='signin')
+def upload(request):
+    return HttpResponse('<h1>Upload View</h1>')
