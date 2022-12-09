@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 
-from .models import Profile
+from .models import Profile, Post
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
@@ -12,6 +12,22 @@ def index(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
     return render(request, 'index.html', {'user_profile': user_profile})
+
+
+@login_required(login_url='signin')
+def upload(request):
+    if request.method == 'POST':
+        user = request.user.username
+        image = request.FILES.get('image_upload')
+        caption = request.POST['caption']
+
+        new_post = Post.objects.create(user=user, image=image, caption=caption)
+        new_post.save()
+
+        return redirect('/')
+
+    else:
+        return redirect('/')
 
 
 @login_required(login_url="signin")
@@ -103,6 +119,4 @@ def logout(request):
     return redirect('signin')
 
 
-@login_required(login_url='signin')
-def upload(request):
-    return HttpResponse('<h1>Upload View</h1>')
+
